@@ -1,0 +1,13 @@
+_BASE_: ../Base-SBS.yml
+
+MODEL:
+  BACKBONE:
+    WITH_IBN: True
+    PRETRAIN_PATH: '/mnt/dolphinfs/hdd_pool/docker/user/hadoop-vacv/zhouxiao/research/fast-reid-master-mixstyle/pretrained/resnet50_ibn_a-d9d0bb7b.pth'
+    NORM: BN #for 1 GPU
+
+DATASETS:
+  NAMES: ("MSMT17",)
+  TESTS: ("MSMT17",)
+
+OUTPUT_DIR: logs/msmt17/sbs_R50-ibn

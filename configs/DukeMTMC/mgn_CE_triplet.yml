@@ -1,0 +1,58 @@
+_BASE_: ../Base-MGN.yml
+
+INPUT:
+  SIZE_TRAIN: [384, 128]
+  SIZE_TEST: [384, 128]
+
+
+MODEL:
+  BACKBONE:
+    WITH_IBN: False
+    PRETRAIN_PATH: '/mnt/dolphinfs/hdd_pool/docker/user/hadoop-vacv/zhouxiao/research/fast-reid-master-mixstyle/pretrained/resnet50_ibn_a-d9d0bb7b.pth'
+    #PRETRAIN_PATH: '/mnt/dolphinfs/hdd_pool/docker/user/hadoop-vacv/zhouxiao/research/fast-reid-master-mixstyle/pretrained/lupws_r50.pth'
+    NORM: BN #for 1 GPU
+
+
+  LOSSES:
+    NAME: ( "CrossEntropyLoss",  "TripletLoss", )  #"SupConLoss", ) #, "MoCoLoss", "MaxCone")  #default ("CrossEntropyLoss","TripletLoss",)
+    
+    TRI:
+      MARGIN: 0.0
+      HARD_MINING: True # default True
+      NORM_FEAT: False
+
+    MAXCONE:
+      SCALE: 0.1
+      TEMP: 0.04
+      TYPE: 'adaptive'
+  
+  #PIXEL_MEAN: [83.022, 77.974, 80.642]
+  #PIXEL_STD: [66.372, 63.468, 60.974]
+
+  HEADS:
+    NORM: BN #for 1 GPU
+    NECK_FEAT: after
+    POOL_LAYER: GeneralizedMeanPoolingP
+    CLS_LAYER: Linear  # CircleSoftmax
+    SCALE: 1  #64
+    MARGIN: 0.   #0.35
+    CLS_ENABLE: True  # True
+    EMBEDDING_DIM: 256
+
+DATALOADER:
+  NUM_INSTANCE: 8  ## default 16
+  SAMPLER_TRAIN: BalancedIdentitySampler
+
+SOLVER:
+  BASE_LR: 0.00035  ## default 0.00035
+  IMS_PER_BATCH: 128   ## default 64
+  WARMUP_ITERS: 500  ## default 2000
+
+  FREEZE_ITERS: 500  ## default 1000
+
+
+DATASETS:
+  NAMES: ("DukeMTMC",)
+  TESTS: ("DukeMTMC",)
+
+OUTPUT_DIR: /mnt/dolphinfs/hdd_pool/docker/user/hadoop-vacv/zhouxiao/research/fast-reid-master-mixstyle/logs/dukemtmc/imgnet_mgn_CE_triplet_input384_noibn

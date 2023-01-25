@@ -1,0 +1,57 @@
+_BASE_: ../Base-bagtricks.yml
+
+INPUT:
+  SIZE_TRAIN: [256, 256]
+  SIZE_TEST: [256, 256]
+
+MODEL:
+  META_ARCHITECTURE: Baseline  # default Baseline
+  NUM_FEAT_PER_ID: 1
+
+  BACKBONE:
+    WITH_IBN: True
+    NORM: BN
+    PRETRAIN_PATH: '/mnt/dolphinfs/hdd_pool/docker/user/hadoop-vacv/zhouxiao/research/fast-reid-master-mixstyle/pretrained/resnet50_ibn_a-d9d0bb7b.pth'
+
+  HEADS:
+    POOL_LAYER: GeneralizedMeanPooling
+    NORM: BN 
+    CLS_LAYER: Linear  #default Linear.   CircleSoftmax
+    SCALE: 1   #default 1  64 for circle
+    MARGIN: 0.  #default 0.  0.35 for circle
+    CLS_ENABLE: False  # default True
+
+  LOSSES:
+    NAME: (  "MSLoss", )  #default "CrossEntropyLoss", "TripletLoss", "MaxCone", "MoCoLoss"
+    TRI:
+      HARD_MINING: True
+      MARGIN: 0.0
+      SCALE: 1.0
+    MOCO:
+      SCALE: 1.0
+      TYPE: "triplet"
+    MAXCONE:
+      SCALE: 1.0
+    CE:
+      SCALE: 1.0
+    MULTINCE:
+      SCALE: 1.0
+
+
+DATASETS:
+  NAMES: ( "VeRiWild",)
+  TESTS: ( "SmallVeRiWild", "MediumVeRiWild", "LargeVeRiWild","VeRi")
+
+SOLVER:
+  IMS_PER_BATCH: 512 # 512 For 4 GPUs
+  MAX_EPOCH: 120 #120
+  STEPS: [30, 70, 90]
+  WARMUP_ITERS: 3000
+
+  CHECKPOINT_PERIOD: 20
+
+TEST:
+  EVAL_PERIOD: 10
+  IMS_PER_BATCH: 128
+
+OUTPUT_DIR: /mnt/dolphinfs/hdd_pool/docker/user/hadoop-vacv/zhouxiao/research/fast-reid-master-mixstyle/logs/veriwild/norm_single_ms

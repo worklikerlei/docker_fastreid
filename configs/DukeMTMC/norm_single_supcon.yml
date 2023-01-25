@@ -1,0 +1,40 @@
+_BASE_: ../Base-SBS.yml
+
+MODEL:
+  BACKBONE:
+    WITH_IBN: True
+    PRETRAIN_PATH: '/mnt/dolphinfs/hdd_pool/docker/user/hadoop-vacv/zhouxiao/research/fast-reid-master-mixstyle/pretrained/resnet50_ibn_a-d9d0bb7b.pth'
+    NORM: BN #for 1 GPU
+
+
+  LOSSES:
+    NAME: ( "SupConLoss", ) #, "MoCoLoss", "MaxCone")  #default ("CrossEntropyLoss","TripletLoss",)
+
+    MAXCONE:
+      SCALE: 1.0
+      
+  HEADS:
+    NORM: BN #for 1 GPU
+    NECK_FEAT: after
+    POOL_LAYER: GeneralizedMeanPoolingP
+    CLS_LAYER: Linear  # CircleSoftmax
+    SCALE: 1  #64
+    MARGIN: 0.   #0.35
+    CLS_ENABLE: False  # True
+
+DATALOADER:
+  NUM_INSTANCE: 8  ## default 16
+
+SOLVER:
+  BASE_LR: 0.00035  ## default 0.00035
+  IMS_PER_BATCH: 128   ## default 64
+  WARMUP_ITERS: 1000 ## default 2000
+
+  FREEZE_ITERS: 0  ## default 1000
+
+
+DATASETS:
+  NAMES: ("DukeMTMC",)
+  TESTS: ("DukeMTMC",)
+
+OUTPUT_DIR: /mnt/dolphinfs/hdd_pool/docker/user/hadoop-vacv/zhouxiao/research/fast-reid-master-mixstyle/logs/dukemtmc/norm_single_supcon

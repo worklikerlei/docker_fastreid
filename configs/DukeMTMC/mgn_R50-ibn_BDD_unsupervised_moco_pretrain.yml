@@ -1,0 +1,13 @@
+_BASE_: ../Base-MGN.yml
+
+MODEL:
+  BACKBONE:
+    WITH_IBN: True
+    PRETRAIN: True
+    PRETRAIN_PATH: 'logs/dukemtmc/mgn_R50-ibn/ckpt_0199.pth'
+
+DATASETS:
+  NAMES: ("DukeMTMC",)
+  TESTS: ("DukeMTMC",)
+
+OUTPUT_DIR: logs/dukemtmc/mgn_R50-ibn

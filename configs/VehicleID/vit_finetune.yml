@@ -1,0 +1,71 @@
+_BASE_: ../Base-bagtricks.yml
+
+INPUT:
+  SIZE_TRAIN: [256, 256]
+  SIZE_TEST: [256, 256]
+
+
+MODEL :
+
+  META_ARCHITECTURE: Baseline  # default Baseline
+  NUM_FEAT_PER_ID: 1
+
+  BACKBONE:
+    NAME: build_vit_backbone  # with mixstyle  # build_resnet_backbone (without mixstyle)
+    DEPTH: 'base'  # with mixstyle  # build_resnet_backbone (without mixstyle)
+    FEAT_DIM: 768
+    
+    #MIXSTYLE: () #'layer1', 'layer2' )
+
+    NORM: syncBN
+    PRETRAIN: True  # load imagenet pretrained backbone resnet-50
+    PRETRAIN_PATH: '/mnt/dolphinfs/hdd_pool/docker/user/hadoop-vacv/zhouxiao/research/fast-reid-master-mixstyle/pretrained/jx_vit_base_p16_224-80ecf9dd.pth'
+
+    EXTRA_BN: False  # finetune for MOT20 pretrained model
+
+  HEADS:
+    NORM: syncBN  # syncBN for multi-GPU
+    POOL_LAYER: GeneralizedMeanPooling
+
+    CLS_ENABLE: True  # default True
+    CLS_LAYER: Linear #CircleSoftmax  #default Linear.   CircleSoftmax
+    SCALE: 1   #default 1.  64 for circle
+    MARGIN: 0.  #default 0.  0.35 for circle
+
+  LOSSES:
+    NAME: ( "CrossEntropyLoss", "TripletLoss" )  #default "CrossEntropyLoss", "TripletLoss", "MaxCone", "MoCoLoss"
+    TRI:
+      HARD_MINING: False
+      MARGIN: 0.0
+    MOCO:
+      SCALE: 0.5
+    MAXCONE:
+      SCALE: 1.0
+    CE:
+      SCALE: 1.0
+    MULTINCE:
+      SCALE: 1.0
+
+SOLVER:
+  BIAS_LR_FACTOR: 1.
+  BASE_LR: 0.00035
+  ETA_MIN_LR: 1e-7
+
+  IMS_PER_BATCH: 512
+  MAX_EPOCH: 120
+  STEPS: [30, 70, 90]
+  WARMUP_ITERS: 2000  # default 2000 for bs-512 
+
+  CHECKPOINT_PERIOD: 10
+
+DATASETS:
+  NAMES: ( "VehicleID",)
+  TESTS: ( "SmallVehicleID", "MediumVehicleID", "LargeVehicleID",)
+
+
+TEST:
+  EVAL_PERIOD: 10
+  IMS_PER_BATCH: 256
+
+OUTPUT_DIR: /mnt/dolphinfs/hdd_pool/docker/user/hadoop-vacv/zhouxiao/research/fast-reid-master-mixstyle/logs/vehicleid/vit_4gpu_512
+

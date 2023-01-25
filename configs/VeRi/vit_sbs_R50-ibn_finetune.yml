@@ -1,0 +1,90 @@
+_BASE_: ../Base-SBS.yml
+
+INPUT:
+  SIZE_TRAIN: [256, 256]
+  SIZE_TEST: [256, 256]
+
+  FLIP:
+    ENABLED: True
+    PROB: 0.5
+
+MODEL :
+
+  META_ARCHITECTURE: Baseline  # default Baseline
+  NUM_FEAT_PER_ID: 1
+
+
+  PRETRAIN: False  # default False, load pretrained entire model 
+  PRETRAIN_PATH: 'logs/veri/sbs_R50-ibn/MOT20GT_moco_pretrain_model.pth'
+
+  BACKBONE:
+    NAME: build_vit_backbone  # with mixstyle  # build_resnet_backbone (without mixstyle)
+    DEPTH: 'base'  # with mixstyle  # build_resnet_backbone (without mixstyle)
+    FEAT_DIM: 768
+    
+    MIXSTYLE: () #'layer1', 'layer2' )
+    WITH_IBN: True
+    WITH_NL: True
+
+    NORM: BN #for 1 GPU
+    PRETRAIN: True  # load imagenet pretrained backbone resnet-50
+    PRETRAIN_PATH: 'jx_vit_base_p16_224-80ecf9dd.pth'
+
+    EXTRA_BN: False  # finetune for MOT20 pretrained model
+
+  HEADS:
+    NORM: BN  # syncBN for multi-GPU
+    CLS_ENABLE: True  # default True
+    EMBEDDING_DIM: 0  # default 0
+    WITH_BNNECK: True
+
+  LOSSES:
+    NAME: ( "CrossEntropyLoss", "TripletLoss") #"TripletLoss", "CrossEntropyLoss", "MoCoLoss" ) #"MaxCone")  #default ("CrossEntropyLoss","TripletLoss",)
+    TRI:
+      NORM_FEAT: False  # default False
+      SCALE: 1.
+      HARD_MINING: True
+
+    MOCO:
+      SCALE: 1.0
+
+    MULTINCE:
+      SCALE: 1.0
+      
+    MAXCONE:
+      SCALE: 1.0
+    
+    CIRCLE:
+      SCALE: 0.1
+
+
+SOLVER:
+  OPT: SGD
+  BASE_LR: 0.008   # default 0.01
+  ETA_MIN_LR: 7.7e-5  #default 7.7e-5
+
+  IMS_PER_BATCH: 64   # 64 for finetune, 256 for pretraining
+  MAX_EPOCH: 120  # 60 for finetune, 200 for pretraining
+  WARMUP_ITERS: 3000
+  FREEZE_ITERS: 3000  # 3000 for finetune, 0 for pretraining
+  DELAY_EPOCHS: 30
+
+  WEIGHT_DECAY:  1e-4
+  WEIGHT_DECAY_BIAS: 1e-4
+  BIAS_LR_FACTOR: 2.0
+
+  CHECKPOINT_PERIOD: 10
+
+DATASETS:
+  NAMES: ( "VeRi",) # "BDD")
+  TESTS: ( "VeRi", "SmallVehicleID", "MediumVehicleID", "LargeVehicleID",)
+
+DATALOADER:
+  NUM_INSTANCE: 4
+  SAMPLER_TRAIN: BalancedIdentitySampler
+
+TEST:
+  EVAL_PERIOD: 10
+  IMS_PER_BATCH: 256
+
+OUTPUT_DIR: logs/veri/sbs_R50-ibn

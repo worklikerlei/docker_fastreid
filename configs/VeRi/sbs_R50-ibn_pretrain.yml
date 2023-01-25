@@ -1,0 +1,65 @@
+_BASE_: ../Base-SBS.yml
+
+INPUT:
+  SIZE_TRAIN: [256, 256]
+  SIZE_TEST: [256, 256]
+
+MODEL:
+  
+  META_ARCHITECTURE: MoCo # default Baseline
+
+  QUEUE_SIZE: 65536
+
+  BACKBONE:
+    WITH_IBN: True
+    WITH_NL: True
+
+    NORM: syncBN #for 1 GPU
+    PRETRAIN: False  # load imagenet pretrained backbone resnet-50
+    
+    EXTRA_BN: False  # finetune for MOT20 pretrained model
+
+  HEADS:
+    NORM: syncBN  # syncBN for multi-GPU
+    CLS_ENABLE: False  # default True
+  
+  LOSSES:
+    NAME: ("TripletLoss","MoCoLoss",)    #default ("CrossEntropyLoss", "TripletLoss",)
+            
+    TRI:
+      MARGIN: 0.
+      HARD_MINING: True
+      NORM_FEAT: False
+      SCALE: 0.
+
+    MOCO:
+     SCALE: 1.
+
+  PRETRAIN: False  # default False, load pretrained entire model 
+  PRETRAIN_PATH: 'logs/veri/sbs_R50-ibn/MOT20_pretrain_model.pth'
+
+SOLVER:
+  OPT: SGD
+  BASE_LR: 0.01
+  ETA_MIN_LR: 7.7e-5
+
+  IMS_PER_BATCH: 256   # 64 for finetune, 256 for pretraining
+  MAX_EPOCH: 200  # 60 for finetune, 200 for pretraining
+  WARMUP_ITERS: 1000  #default 3000
+  FREEZE_ITERS: 0  # 3000 for finetune, 0 for pretraining
+
+  CHECKPOINT_PERIOD: 10
+
+DATASETS:
+  NAMES: ("VeRi",)
+  TESTS: ("VeRi",)
+
+DATALOADER:
+  SAMPLER_TRAIN: BalancedIdentitySampler
+  NUM_INSTANCE: 8  ## default 16
+
+TEST:
+  EVAL_PERIOD: 10
+  IMS_PER_BATCH: 256
+
+OUTPUT_DIR: logs/veri/sbs_R50-ibn

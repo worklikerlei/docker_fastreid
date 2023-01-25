@@ -1,0 +1,50 @@
+_BASE_: ../Base-bagtricks.yml
+
+INPUT:
+  SIZE_TRAIN: [256, 256]
+  SIZE_TEST: [256, 256]
+
+MODEL:
+  META_ARCHITECTURE: Baseline  # default Baseline
+  NUM_FEAT_PER_ID: 1
+
+  BACKBONE:
+    WITH_IBN: True
+    NORM: BN
+
+    PRETRAIN_PATH: '/mnt/dolphinfs/hdd_pool/docker/user/hadoop-vacv/zhouxiao/research/fast-reid-master-mixstyle/pretrained/resnet50_ibn_a-d9d0bb7b.pth'
+  HEADS:
+    POOL_LAYER: GeneralizedMeanPooling
+    NORM: BN 
+    CLS_LAYER: Linear  #default Linear.   CircleSoftmax
+    SCALE: 1   #default 1  64 for circle
+    MARGIN: 0.  #default 0.  0.35 for circle
+    CLS_ENABLE: False  # default True
+
+    NECK_FEAT: after
+
+  LOSSES:
+    NAME: ( "CircleLoss", )  #default "CrossEntropyLoss", "TripletLoss", "MaxCone", "MoCoLoss"
+
+
+DATASETS:
+  NAMES: ("VehicleID",)
+  TESTS: ("SmallVehicleID", "MediumVehicleID", "LargeVehicleID")
+
+DATALOADER:
+  NUM_INSTANCE: 8
+
+SOLVER:
+  
+  IMS_PER_BATCH: 512  # default 512 
+  MAX_EPOCH: 120
+  STEPS: [30, 70, 90]
+  WARMUP_ITERS: 2000  # default 2000 for bs-512 
+
+  CHECKPOINT_PERIOD: 20
+
+TEST:
+  EVAL_PERIOD: 10
+  IMS_PER_BATCH: 128
+
+OUTPUT_DIR: /mnt/dolphinfs/hdd_pool/docker/user/hadoop-vacv/zhouxiao/research/fast-reid-master-mixstyle/logs/vehicleid/norm_single_circle_512_8_120e
